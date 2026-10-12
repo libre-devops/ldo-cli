@@ -14,7 +14,7 @@
 name = "container-azure-cli"
 version = "0"
 requires-python = ">=3.14"
-dependencies = ["azure-cli==2.90.0"]
+dependencies = ["azure-cli==2.91.0"]
 
 [tool.uv]
 package = false
