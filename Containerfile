@@ -26,10 +26,10 @@ ARG PACKAGE_INDEX=https://pypi.org/simple
 ARG DEBIAN_UPGRADE=true
 
 # uv, only to install the locked dependencies; it never reaches a final image.
-FROM ghcr.io/astral-sh/uv:0.12.18@sha256:3adc3706091ce7c2fe595e669628caedd6d951551b92b258b7e7dbe06d9440bc AS uv
+FROM ghcr.io/astral-sh/uv:0.13.6@sha256:af22a52f5eafef3d78e551599d405c02df61919d18028f0cea8eda93bc9986d0 AS uv
 
 # Build: the tool and its locked dependencies, into a virtual environment at /opt/ldo.
-FROM docker.io/library/python:3.14-slim-trixie@sha256:caaf356f40667c496d405780745b9ac25771c189a51dfcc42430d531ea09f8a2 AS build
+FROM docker.io/library/python:3.14-slim-trixie@sha256:cd89c30eda26ee911a4611b18680086e0ea42e6f5f8cbe653d07fa7958c9cec8 AS build
 COPY --from=uv /uv /usr/local/bin/uv
 ENV UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy \
@@ -80,12 +80,12 @@ RUN --mount=type=secret,id=netrc,target=/root/.netrc \
 # same on every architecture for one Python version, and this is the same base image, so
 # the result is what compiling in place would give, in seconds rather than an hour.
 # unchecked-hash: the image never changes, so Python need not check the sources.
-FROM --platform=$BUILDPLATFORM docker.io/library/python:3.14-slim-trixie@sha256:caaf356f40667c496d405780745b9ac25771c189a51dfcc42430d531ea09f8a2 AS compile-az
+FROM --platform=$BUILDPLATFORM docker.io/library/python:3.14-slim-trixie@sha256:cd89c30eda26ee911a4611b18680086e0ea42e6f5f8cbe653d07fa7958c9cec8 AS compile-az
 COPY --from=build-az /opt/az /opt/az
 RUN python -W ignore -m compileall -q -j 0 --invalidation-mode unchecked-hash /opt/az/lib
 
 # Runtime: the same base, patched, with a non-root user and the tool on PATH.
-FROM docker.io/library/python:3.14-slim-trixie@sha256:caaf356f40667c496d405780745b9ac25771c189a51dfcc42430d531ea09f8a2 AS runtime
+FROM docker.io/library/python:3.14-slim-trixie@sha256:cd89c30eda26ee911a4611b18680086e0ea42e6f5f8cbe653d07fa7958c9cec8 AS runtime
 # DEBIAN_UPGRADE=false where Debian's mirrors cannot be reached: the base image's own
 # packages are then the image's.
 ARG DEBIAN_UPGRADE
